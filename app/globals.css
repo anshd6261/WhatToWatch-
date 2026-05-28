@@ -1,0 +1,211 @@
+@import "tailwindcss";
+
+/* ============================================================
+   WhatToWatch — design system
+   Strict black & white. Color only from posters + playing trailers.
+   ============================================================ */
+
+@theme {
+  /* Monochrome palette only */
+  --color-ink: #ffffff;            /* foreground / white */
+  --color-void: #000000;           /* pure black base   */
+  --color-glass: rgba(255, 255, 255, 0.04);
+  --color-glass-strong: rgba(255, 255, 255, 0.07);
+  --color-hair: rgba(255, 255, 255, 0.12); /* hairline borders */
+
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Radii — 38px on surfaces, pill on controls */
+  --radius-card: 38px;
+  --radius-soft: 26px;
+  --radius-pill: 9999px;
+
+  /* Motion */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #000000;
+  --fg: #ffffff;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  /* faint top-down vignette so pure-black layers read as depth */
+  background-image: radial-gradient(
+    120% 100% at 50% -10%,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0) 55%
+  );
+  background-attachment: fixed;
+}
+
+::selection {
+  background: rgba(255, 255, 255, 0.85);
+  color: #000;
+}
+
+/* ---- Scrollbars: thin, monochrome ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* ============================================================
+   Glassmorphism surfaces
+   ============================================================ */
+.glass {
+  background: var(--color-glass);
+  border: 1px solid var(--color-hair);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+}
+.glass-strong {
+  background: var(--color-glass-strong);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(30px) saturate(150%);
+  -webkit-backdrop-filter: blur(30px) saturate(150%);
+}
+
+/* ============================================================
+   Floating hover — everything interactive lifts gently
+   ============================================================ */
+.floaty {
+  transition:
+    transform 0.45s var(--ease-soft),
+    box-shadow 0.45s var(--ease-soft),
+    background-color 0.45s var(--ease-soft),
+    border-color 0.45s var(--ease-soft);
+  will-change: transform;
+}
+.floaty:hover {
+  transform: translateY(-6px) scale(1.012);
+  box-shadow:
+    0 24px 60px -24px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+.floaty:active {
+  transform: translateY(-2px) scale(0.997);
+}
+
+/* Pill buttons */
+.pill {
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-hair);
+  background: rgba(255, 255, 255, 0.05);
+  transition:
+    transform 0.4s var(--ease-soft),
+    background-color 0.4s var(--ease-soft),
+    color 0.4s var(--ease-soft),
+    border-color 0.4s var(--ease-soft);
+}
+.pill:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.pill[data-active="true"] {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+
+/* ============================================================
+   Faded vertical divider between columns
+   short white line, smoothly transparent at both ends
+   ============================================================ */
+.divider-v {
+  width: 1px;
+  align-self: stretch;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.22) 22%,
+    rgba(255, 255, 255, 0.22) 78%,
+    transparent 100%
+  );
+}
+
+/* ============================================================
+   Subtle chromatic aberration + fisheye lens
+   - .lens: gentle barrel distortion on media (posters/trailer),
+            where the only color lives. Safe (no glass/fixed impact).
+   - .ab-overlay: faint global RGB-split overlay for a lens feel.
+   SVG filter lives in <FxLayer/>. Both respect reduced motion.
+   ============================================================ */
+.lens {
+  filter: url(#wtw-lens);
+}
+
+.ab-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.5;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(130% 120% at 50% 50%, transparent 58%, rgba(255, 0, 40, 0.06) 100%),
+    radial-gradient(130% 120% at 49.4% 49.6%, transparent 58%, rgba(0, 200, 255, 0.06) 100%);
+}
+
+/* very subtle global lens curvature toggle (experimental) */
+.fisheye {
+  filter: url(#wtw-lens);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floaty,
+  .pill {
+    transition: none;
+  }
+  .floaty:hover {
+    transform: none;
+  }
+  .lens,
+  .fisheye {
+    filter: none;
+  }
+  .ab-overlay {
+    display: none;
+  }
+}
+
+/* Utility: hide native number input artifacts, etc. */
+.no-tap-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Marquee-free, smooth horizontal rec rows */
+.row-scroll {
+  scroll-snap-type: x proximity;
+}
+.row-scroll > * {
+  scroll-snap-align: start;
+}

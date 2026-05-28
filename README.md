@@ -37,7 +37,7 @@ The app runs with **no keys** (browser-stored library). Add keys to enable:
 | --- | --- | --- |
 | Movies/series search, posters, trailers, providers, recs | `TMDB_API_KEY` | free, [get one](https://www.themoviedb.org/settings/api) |
 | Books | `GOOGLE_BOOKS_API_KEY` | optional (works unauthenticated) |
-| Smart recommendations | `OPENAI_API_KEY` | embeddings (Engine A) + similarity re-rank (Engine B) |
+| Smart recommendations | `OPENAI_API_KEY` (+ optional `WTW_AI_BASE_URL`) | embeddings (Engine A) + similarity re-rank (Engine B). **Free option:** use a Google Gemini key with `WTW_AI_BASE_URL` — see `.env.example` |
 | Cross-device sync | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | run `supabase/migrations/0001_init.sql` |
 
 ## How recommendations work

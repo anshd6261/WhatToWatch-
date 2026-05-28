@@ -5,7 +5,13 @@ let client: OpenAI | null = null;
 
 function getClient(): OpenAI | null {
   if (!process.env.OPENAI_API_KEY) return null;
-  if (!client) client = new OpenAI();
+  if (!client) {
+    // WTW_AI_BASE_URL lets you point at any OpenAI-compatible provider
+    // (e.g. Google Gemini's free tier, Groq, OpenRouter) instead of OpenAI.
+    client = new OpenAI({
+      baseURL: process.env.WTW_AI_BASE_URL || undefined,
+    });
+  }
   return client;
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import { useFx } from "./FxLayer";
 
@@ -18,7 +19,11 @@ export function Poster({
 }) {
   const fx = useFx();
   const useLens = lens && fx.lens;
-  if (!src) {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => setFailed(false), [src]);
+
+  if (!src || failed) {
     return (
       <div
         className={`grid place-items-center bg-white/[0.03] ${className}`}
@@ -36,6 +41,7 @@ export function Poster({
       alt={alt}
       loading="lazy"
       draggable={false}
+      onError={() => setFailed(true)}
       className={`object-cover ${useLens ? "lens" : ""} ${className}`}
     />
   );

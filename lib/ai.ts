@@ -23,6 +23,10 @@ const SMALL = process.env.WTW_EMBED_SMALL || "text-embedding-3-small";
 const LARGE = process.env.WTW_EMBED_LARGE || "text-embedding-3-large";
 const RERANK = process.env.WTW_RERANK_MODEL || "gpt-4o-mini";
 
+// Free tiers (e.g. Gemini) cap how much you can embed per request, so we send
+// inputs in chunks and stitch the results back together in order.
+const EMBED_BATCH = Number(process.env.WTW_EMBED_BATCH || 16);
+
 /** Returns one embedding per input string, or null if AI is not configured. */
 export async function embed(
   texts: string[],
@@ -30,12 +34,15 @@ export async function embed(
 ): Promise<number[][] | null> {
   const c = getClient();
   if (!c || texts.length === 0) return null;
+  const model = opts.large ? LARGE : SMALL;
   try {
-    const res = await c.embeddings.create({
-      model: opts.large ? LARGE : SMALL,
-      input: texts.map((t) => t.slice(0, 6000)),
-    });
-    return res.data.map((d) => d.embedding as number[]);
+    const out: number[][] = [];
+    for (let i = 0; i < texts.length; i += EMBED_BATCH) {
+      const slice = texts.slice(i, i + EMBED_BATCH).map((t) => t.slice(0, 6000));
+      const res = await c.embeddings.create({ model, input: slice });
+      for (const d of res.data) out.push(d.embedding as number[]);
+    }
+    return out.length === texts.length ? out : null;
   } catch {
     return null;
   }
